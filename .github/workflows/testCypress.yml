@@ -1,0 +1,33 @@
+name: Pruebas E2E con Cypress
+
+on: 
+  push: # definimos los eventos que van a disparar esta acción
+    branches: [main] #le decimos que se ejecute cada vez que hagamos push a main
+  pull_request:
+    branches: [main] #y también cada vez que hagamos un pull request a main
+
+jobs: #definimos los trabajos que se van a ejecutar, en este caso solo uno llamado cypress-run
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          build: npm run build
+          start: npm run serve   # hay que instalar serve en la aplicación para poder servir el build npm install serve
+          wait-on: 'http://localhost:5173' # espera a que el servidor esté listo antes de ejecutar las pruebas
+          browser: edge
+
+          command: npm cypress run baseUrl= http://localhost:5173 # este comando debe estar definido en el package.json para ejecutar las pruebas de cypress
